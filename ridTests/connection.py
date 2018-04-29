@@ -28,8 +28,11 @@ class Connection:
         self.version = version
         self.vendor = vendor
         self.url = addr
-        #self.lib_auth = interface.lib_auth
-        #self.lib_app = interface.lib_app
+        self.lib_auth = interface.lib_auth
+        self.lib_app = interface.lib_app
+        self.busy = False
+        self.connected = False
+        self.lastError = 0
 
         #Try and add this here...
         if alternate_crust_config is None:
@@ -56,14 +59,16 @@ class Connection:
             else:
                 pass
 
-        @interface.safe_callback("void(void*)")
-        def o_cb(user_data):
-
+        @interface.safe_callback("void(void*,FfiResult*,Authenticator*)")
+        def o_cb(user_data, result, authenticator):
+            self.busy = False
+            self.connected = (result.error_code == 0)
+            self.lastError = result.error_code
             ## ??  wise to define this inline?
             if cb:
-                cb(user_data)
+                cb(self, user_data, result, authenticator)
             else:
-                interface.print_default_ffi_result(user_data, 'HOO! logged into the SAFE Network')
+                interface.print_default_ffi_result(result, 'HOO! logged into the SAFE Network')
 
 
         account_locator = interface.ffi_str(account_locator)
@@ -73,9 +78,10 @@ class Connection:
         else:
             userData = NULL
 
-        #self.lib_auth.login(account_locator, password, userData, o_disconnect_notifier_cb, o_cb)
-        print('logged into safe')
+        self.busy = True
+        self.lib_auth.login(account_locator, password, userData, o_disconnect_notifier_cb, o_cb)
 
-
+        while self.busy:
+            time.sleep(0.1)
 
 

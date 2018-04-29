@@ -68,7 +68,7 @@ def add_local_crust_config(config_path=ridTests.localization.BINPATH):
     adds config_path to the library configuration
     '''
     print(f'adding {config_path} to config search path')
-    #lib_auth.auth_set_additional_search_path(ffi_str(config_path), NULL, config_search_result_cb)
+    lib_auth.auth_set_additional_search_path(ffi_str(config_path), NULL, config_search_result_cb)
 
 def print_default_ffi_result(result, actionDescription):
     if result.error_code == 0:
@@ -83,18 +83,18 @@ def print_default_ffi_result(result, actionDescription):
 
 
 
-@safe_callback("void(void*)")
-def config_search_result_cb(user_data):
+@safe_callback("void(void*, FfiResult*)")
+def config_search_result_cb(user_data, result):
     print_default_ffi_result(result, 'changing search path')
 
-@safe_callback("void(void*)")
-def stem_callback(user_data):
+@safe_callback("void(void*, FfiResult*, char*)")
+def stem_callback(user_data, result, path):
     global userData
 
     userData = user_data
     myResult = result
-    print_default_ffi_result(user_data, 'executing app_exe_file_stem')
-    print(f'..callback file_stem name: {ffi.string(name)}')
+    print_default_ffi_result(result, 'executing app_exe_file_stem')
+    print(f'..callback file_stem name: {ffi.string(path)}')
 
 
 
@@ -105,8 +105,8 @@ print('Basic SAFE interface generated')
 
 
 
-## todo .. is this the right place for this? /// not needed here for testing
-#lib_app.app_exe_file_stem(ffi.NULL, stem_callback)
+## todo .. is this the right place for this?
+lib_app.app_exe_file_stem(ffi.NULL, stem_callback)
 
 
 

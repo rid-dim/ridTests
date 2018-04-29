@@ -17,9 +17,89 @@
 # https://cffi.readthedocs.io/en/latest/overview.html#simple-example-abi-level-in-line
 #
 ########################################################################################################################
-import ridTests.localization
+import ridTests.localization as localization
+import tarfile
 from cffi import FFI
 ffi = FFI()
+
+_c_functions = {}
+_c_structs = {}
+
+# todo has implications for where ./extracted_binaries etc. are
+
+#############################
+#  Private methods
+#############################
+
+def __get_file_contents(fname):
+    with open(fname, 'r') as f:
+        return f.read()
+
+def __split_to_lines(data):
+    return [line.strip('\r\n') for line in data.splitlines()]
+
+def __register_func_sig(f):
+    '''
+    registers all function names in global:functions.
+    Only useful for print_funcs and get_function_signature right now, but later could be useful for online help
+    #todo parse for signature and callback
+    '''
+    global _c_functions
+    bits = f.split(maxsplit=1)
+    first_bracket=bits[1].find('(')
+    f=bits[1][:first_bracket]
+    rest=bits[1][first_bracket:]
+    _c_functions[f]=rest
+
+#############################
+#  Utility methods
+#############################
+
+
+def print_funcs():
+    '''
+    prints all registered functions and their signatures
+    '''
+    max_len= max([len(k) for k in _c_functions.keys()]) + 1
+    print ('listing all functions bound from SAFE binary FFI: (func:sig)\n---------')
+    for k,v in _c_functions.items():
+        # ..to support eventual logging rather than directly print
+        outstr=f'{k:{max_len}}:{v}'
+        print (outstr)
+    print('----\n')
+
+
+def get_function_signature(f):
+    '''
+    returns the signature of a bound c function
+    '''
+    return _c_functions.get(f, f'function not found: {f}')
+
+def print_dtypes():
+    pass
+    # may be nice to implement later for debugging
+
+#############################
+#
+#  At this point, with functions defined, we load the data and register it.
+#
+#############################
+
+_func_defs=__get_file_contents(localization.SAFEFUNCHEADERS)
+_struct_defs=__get_file_contents(localization.SAFEDATAHEADERS)
+#todo check/write tests for windows path compatibility of above
+
+ffi.cdef(_struct_defs)
+ffi.cdef(_func_defs)
+tar = tarfile.open(localization.SAFEAPPFILE + '.tar.gz', "r:gz")
+tar.extractall(localization.BINPATH)
+tar.close()
+tar = tarfile.open(localization.SAFEAUTHFILE + '.tar.gz', "r:gz")
+tar.extractall(localization.BINPATH)
+tar.close()
+lib_app = ffi.dlopen(localization.SAFEAPPFILE)
+lib_auth = ffi.dlopen(localization.SAFEAUTHFILE)
+
 
 
 
