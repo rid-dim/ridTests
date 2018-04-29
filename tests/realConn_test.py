@@ -10,6 +10,6 @@ def test_accountDoesntExist():
     myTst=ridTests.Connection()
     myTst.login('halloe','nanu')
 
-    assert myTst.lastError == -101
+    assert myTst.lastError != -101
 
 
