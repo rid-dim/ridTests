@@ -8,7 +8,7 @@ environment:
     # isn't covered by this document) at the time of writing.
 
     - PYTHON: "C:\\Python36-x64"
-      TOXENV: "py36-ci-win"
+#      TOXENV: "py36-ci-win"
     - PYTHON: "C:\\Python36"
 
 install:
