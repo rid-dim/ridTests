@@ -28,8 +28,8 @@ test_script:
   # the interpreter you're using - Appveyor does not do anything special
   # to put the Python version you want to use on PATH.
   #- "build.cmd %PYTHON%\\python.exe setup.py test"
-  #- "%PYTHON%\\python.exe setup.py test"
-  - "tox -e %TOXENV%"
+  #- "%PYTHON%\\python.exe setup.py test" -e %TOXENV%
+  - "tox"
 
 after_test:
   # This step builds your wheels.
