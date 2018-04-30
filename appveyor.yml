@@ -8,12 +8,11 @@ environment:
     # isn't covered by this document) at the time of writing.
 
     - PYTHON: "C:\\Python36-x64"
-#      TOXENV: "py36-ci-win"
     - PYTHON: "C:\\Python36"
 
 install:
   # We need wheel installed to build wheels
-  - "%PYTHON%\\python.exe -m pip install wheel tox cffi"
+  - "%PYTHON%\\python.exe -m pip install wheel cffi"
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "pip install -U tox"
 
